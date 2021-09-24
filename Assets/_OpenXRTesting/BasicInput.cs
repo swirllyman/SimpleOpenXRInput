@@ -12,12 +12,16 @@ public class BasicInput : MonoBehaviour
     public Haptics myHaptics;
     public InputActions inputActions;
 
-    public delegate void JoystickUpdated(int controllerID, Vector2 axis);
-    public static event JoystickUpdated onJoystickUpdate;
+    public delegate void JoystickPositionUpdated(int controllerID, Vector2 axis);
+    public static event JoystickPositionUpdated onJoystickUpdate;
 
-    public delegate void TriggerUpdated(int controllerID, Vector2 axis);
-    public static event TriggerUpdated onTriggerUpdate;
+    public delegate void TriggerPullUpdated(int controllerID, Vector2 axis);
+    public static event TriggerPullUpdated onTriggerUpdate;
 
+    public delegate void TriggerClickedUpdated(int controllerID, bool clicked);
+    public static event TriggerClickedUpdated onTriggerClicked;
+
+    #region Mono
     void Awake()
     {
         if(singleton != null)
@@ -25,10 +29,8 @@ public class BasicInput : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        
+
         singleton = this;
-
-
         myHaptics.SetupHaptics();
         inputActions.SetupActions(this);
     }
@@ -40,39 +42,38 @@ public class BasicInput : MonoBehaviour
             actionAsset.Enable();
         }
     }
+    #endregion
 
-    internal void JoystickUpdate(int controllerID, Vector2 axis)
+    #region Callbacks
+    internal void JoystickPositionUpdate(int controllerID, Vector2 axis)
     {
         onJoystickUpdate?.Invoke(controllerID, axis);
     }
 
-    internal void TriggerUpdate(int controllerID, Vector2 axis)
+    internal void TriggerPullUpdate(int controllerID, Vector2 axis)
     {
         onTriggerUpdate?.Invoke(controllerID, axis);
     }
 
+    internal void TriggerClickUpdate(int controllerID, bool clicked)
+    {
+        onTriggerClicked?.Invoke(controllerID, clicked);
+    }
+    #endregion
+
+    #region Static Methods
     public static void PlayHaptics(int controllerID, float amplitude, float duration)
     {
         singleton.myHaptics.PlayHaptics(controllerID, amplitude, duration);
     }
+    #endregion
 }
 
+#region Input Actions
 [System.Serializable]
 public class InputActions
 {
     BasicInput myInput;
-    internal void SetupActions(BasicInput input)
-    {
-        myInput = input;
-        //Joystick
-        joystickAction_Right.action.performed += Joystick_Right;
-        joystickAction_Left.action.performed += Joystick_Left;
-
-        //Trigger
-        triggerPull_Right.action.performed += Trigger_Right;
-        triggerPull_Right.action.performed += Trigger_Left;
-    }
-
     #region Joystick
     [Header("Joystick")]
     public InputActionReference joystickAction_Right;
@@ -81,13 +82,13 @@ public class InputActions
     private void Joystick_Right(InputAction.CallbackContext obj)
     {
         Vector2 turnVector = obj.ReadValue<Vector2>();
-        myInput.JoystickUpdate(0, turnVector);
+        myInput.JoystickPositionUpdate(0, turnVector);
     }
 
     private void Joystick_Left(InputAction.CallbackContext obj)
     {
         Vector2 turnVector = obj.ReadValue<Vector2>();
-        myInput.JoystickUpdate(1, turnVector);
+        myInput.JoystickPositionUpdate(1, turnVector);
     }
     #endregion
 
@@ -95,20 +96,52 @@ public class InputActions
     [Header("Trigger")]
     public InputActionReference triggerPull_Right;
     public InputActionReference triggerPull_Left;
-    private void Trigger_Right(InputAction.CallbackContext obj)
+    public InputActionReference triggerClick_Right;
+    public InputActionReference triggerClick_Left;
+
+    private void TriggerPull_Right(InputAction.CallbackContext obj)
     {
         Vector2 turnVector = obj.ReadValue<Vector2>();
-        myInput.JoystickUpdate(0, turnVector);
+        myInput.JoystickPositionUpdate(0, turnVector);
     }
 
-    private void Trigger_Left(InputAction.CallbackContext obj)
+    private void TriggerPull_Left(InputAction.CallbackContext obj)
     {
         Vector2 turnVector = obj.ReadValue<Vector2>();
-        myInput.JoystickUpdate(1, turnVector);
+        myInput.JoystickPositionUpdate(1, turnVector);
+    }
+
+    private void TriggerClick_Right(InputAction.CallbackContext obj)
+    {
+        Vector2 turnVector = obj.ReadValue<Vector2>();
+        myInput.JoystickPositionUpdate(0, turnVector);
+    }
+
+    private void TriggerClick_Left(InputAction.CallbackContext obj)
+    {
+        Vector2 turnVector = obj.ReadValue<Vector2>();
+        myInput.JoystickPositionUpdate(1, turnVector);
     }
     #endregion
-}
 
+    internal void SetupActions(BasicInput input)
+    {
+        myInput = input;
+
+        //Joystick
+        joystickAction_Right.action.performed += Joystick_Right;
+        joystickAction_Left.action.performed += Joystick_Left;
+
+        //Trigger
+        triggerPull_Right.action.performed += TriggerPull_Right;
+        triggerPull_Right.action.performed += TriggerPull_Left;
+        triggerClick_Right.action.performed += TriggerClick_Right;
+        triggerClick_Left.action.performed += TriggerClick_Left;
+    }
+}
+#endregion
+
+#region Haptics
 [System.Serializable]
 public class Haptics
 {
@@ -177,3 +210,4 @@ public class Haptics
         return false;
     }
 }
+#endregion
