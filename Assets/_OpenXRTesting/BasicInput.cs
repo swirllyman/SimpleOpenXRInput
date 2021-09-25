@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.XR;
-using UnityEngine.InputSystem.XR.Haptics;
 
 public class BasicInput : MonoBehaviour
 {
@@ -12,14 +9,21 @@ public class BasicInput : MonoBehaviour
     public Haptics myHaptics;
     public InputActions inputActions;
 
-    public delegate void JoystickPositionUpdated(int controllerID, Vector2 axis);
-    public static event JoystickPositionUpdated onJoystickUpdate;
+    public delegate void AxisUpdated(int controllerID, Vector2 axis);
+    public delegate void FloatUpdated(int controllerID, float value);
+    public delegate void ButtonUpdated(int controllerID);
 
-    public delegate void TriggerPullUpdated(int controllerID, Vector2 axis);
-    public static event TriggerPullUpdated onTriggerUpdate;
+    //Subscribe to these events for simple input usage
+    public static event AxisUpdated onJoystickUpdate;
 
-    public delegate void TriggerClickedUpdated(int controllerID, bool clicked);
-    public static event TriggerClickedUpdated onTriggerClicked;
+    public static event FloatUpdated onGripPullUpdate;
+    public static event FloatUpdated onTriggerPullUpdate;
+
+    public static event ButtonUpdated onJoystickClicked;
+    public static event ButtonUpdated onTriggerClicked;
+    public static event ButtonUpdated onPrimaryButtonUpdate;
+    public static event ButtonUpdated onSecondaryButtonUpdate;
+    public static event ButtonUpdated onMenuButtonUpdate;
 
     #region Mono
     void Awake()
@@ -44,20 +48,49 @@ public class BasicInput : MonoBehaviour
     }
     #endregion
 
-    #region Callbacks
+    #region Callback Handling
+    //Joystick
     internal void JoystickPositionUpdate(int controllerID, Vector2 axis)
     {
         onJoystickUpdate?.Invoke(controllerID, axis);
     }
 
-    internal void TriggerPullUpdate(int controllerID, Vector2 axis)
+    internal void JoystickClickUpdate(int controllerID)
     {
-        onTriggerUpdate?.Invoke(controllerID, axis);
+        onJoystickClicked?.Invoke(controllerID);
+    }
+    
+    //Trigger
+    internal void TriggerPullUpdate(int controllerID, float pullAmount)
+    {
+        onTriggerPullUpdate?.Invoke(controllerID, pullAmount);
     }
 
-    internal void TriggerClickUpdate(int controllerID, bool clicked)
+    internal void TriggerClickUpdate(int controllerID)
     {
-        onTriggerClicked?.Invoke(controllerID, clicked);
+        onTriggerClicked?.Invoke(controllerID);
+    }
+
+    //Grip
+    internal void GripPullUpdate(int controllerID, float pullAmount)
+    {
+        onGripPullUpdate?.Invoke(controllerID, pullAmount);
+    }
+
+    //Primary, Secondary and Menu
+    internal void PrimaryButtonUpdate(int controllerID)
+    {
+        onPrimaryButtonUpdate?.Invoke(controllerID);
+    }
+
+    internal void SecondaryButtonUpdate(int controllerID)
+    {
+        onSecondaryButtonUpdate?.Invoke(controllerID);
+    }
+
+    internal void MenuButtonUpdate(int controllerID)
+    {
+        onMenuButtonUpdate?.Invoke(controllerID);
     }
     #endregion
 
@@ -74,10 +107,14 @@ public class BasicInput : MonoBehaviour
 public class InputActions
 {
     BasicInput myInput;
+    InputActionMap map;
+
     #region Joystick
     [Header("Joystick")]
     public InputActionReference joystickAction_Right;
     public InputActionReference joystickAction_Left;
+    public InputActionReference joystickClick_Right;
+    public InputActionReference joystickClick_Left;
 
     private void Joystick_Right(InputAction.CallbackContext obj)
     {
@@ -90,6 +127,34 @@ public class InputActions
         Vector2 turnVector = obj.ReadValue<Vector2>();
         myInput.JoystickPositionUpdate(1, turnVector);
     }
+
+    private void JoystickClick_Right(InputAction.CallbackContext obj)
+    {
+        myInput.JoystickClickUpdate(0);
+    }
+
+    private void JoystickClick_Left(InputAction.CallbackContext obj)
+    {
+        myInput.JoystickClickUpdate(1);
+    }
+    #endregion
+
+    #region Grip
+    [Header("Grip")]
+    public InputActionReference gripPull_Right;
+    public InputActionReference gripPull_Left;
+
+    private void GripPull_Right(InputAction.CallbackContext obj)
+    {
+        float pullAmount = obj.ReadValue<float>();
+        myInput.GripPullUpdate(0, pullAmount);
+    }
+
+    private void GripPull_Left(InputAction.CallbackContext obj)
+    {
+        float pullAmount = obj.ReadValue<float>();
+        myInput.GripPullUpdate(1, pullAmount);
+    }
     #endregion
 
     #region Trigger
@@ -101,42 +166,106 @@ public class InputActions
 
     private void TriggerPull_Right(InputAction.CallbackContext obj)
     {
-        Vector2 turnVector = obj.ReadValue<Vector2>();
-        myInput.JoystickPositionUpdate(0, turnVector);
+        float pullAmount = obj.ReadValue<float>();
+        myInput.TriggerPullUpdate(0, pullAmount);
     }
 
     private void TriggerPull_Left(InputAction.CallbackContext obj)
     {
-        Vector2 turnVector = obj.ReadValue<Vector2>();
-        myInput.JoystickPositionUpdate(1, turnVector);
+        float pullAmount = obj.ReadValue<float>();
+        myInput.TriggerPullUpdate(1, pullAmount);
     }
 
     private void TriggerClick_Right(InputAction.CallbackContext obj)
     {
-        Vector2 turnVector = obj.ReadValue<Vector2>();
-        myInput.JoystickPositionUpdate(0, turnVector);
+        myInput.TriggerClickUpdate(0);
     }
 
     private void TriggerClick_Left(InputAction.CallbackContext obj)
     {
-        Vector2 turnVector = obj.ReadValue<Vector2>();
-        myInput.JoystickPositionUpdate(1, turnVector);
+        myInput.TriggerClickUpdate(1);
+    }
+    #endregion
+
+    #region Basic Buttons
+    public InputActionReference primaryButton_Right;
+    public InputActionReference primaryButton_Left;
+
+    public InputActionReference secondaryButton_Right;
+    public InputActionReference secondaryButton_Left;
+
+    public InputActionReference menuButton_Right;
+    public InputActionReference menuButton_Left;
+
+    private void PrimaryButton_Right(InputAction.CallbackContext obj)
+    {
+        myInput.PrimaryButtonUpdate(0);
+    }
+
+    private void PrimaryButton_Left(InputAction.CallbackContext obj)
+    {
+        myInput.PrimaryButtonUpdate(1);
+    }
+
+    private void SecondaryButton_Right(InputAction.CallbackContext obj)
+    {
+        myInput.SecondaryButtonUpdate(0);
+    }
+
+    private void SecondaryButton_Left(InputAction.CallbackContext obj)
+    {
+        myInput.SecondaryButtonUpdate(1);
+    }
+
+    private void MenuButton_Right(InputAction.CallbackContext obj)
+    {
+        myInput.MenuButtonUpdate(0);
+    }
+
+    private void MenuButton_Left(InputAction.CallbackContext obj)
+    {
+        myInput.MenuButtonUpdate(1);
     }
     #endregion
 
     internal void SetupActions(BasicInput input)
     {
         myInput = input;
+        map = new InputActionMap();
+        map.AddAction("Joystick_Right", binding: "<XRController>{RightHand}/{primary2DAxis}");
+
+        map.Enable();
 
         //Joystick
-        joystickAction_Right.action.performed += Joystick_Right;
+        InputAction rightStickAction = map.FindAction("Joystick_Right");
+        if(rightStickAction != null)
+            rightStickAction.performed += Joystick_Right;
+
         joystickAction_Left.action.performed += Joystick_Left;
+        joystickClick_Right.action.performed += JoystickClick_Right;
+        joystickClick_Left.action.performed += JoystickClick_Left;
 
         //Trigger
         triggerPull_Right.action.performed += TriggerPull_Right;
-        triggerPull_Right.action.performed += TriggerPull_Left;
+        triggerPull_Left.action.performed += TriggerPull_Left;
         triggerClick_Right.action.performed += TriggerClick_Right;
         triggerClick_Left.action.performed += TriggerClick_Left;
+
+        //Grip
+        gripPull_Right.action.performed += GripPull_Right;
+        gripPull_Left.action.performed += GripPull_Left;
+
+        //Primary Button
+        primaryButton_Right.action.performed += PrimaryButton_Right;
+        primaryButton_Left.action.performed += PrimaryButton_Left;
+
+        //Secondary Button
+        secondaryButton_Right.action.performed += SecondaryButton_Right;
+        secondaryButton_Left.action.performed += SecondaryButton_Left;
+
+        //Menu Button
+        menuButton_Right.action.performed += MenuButton_Right;
+        menuButton_Left.action.performed += MenuButton_Left;
     }
 }
 #endregion
@@ -153,8 +282,11 @@ public class Haptics
 
     internal void PlayHaptics(int controllerID, float amplitude, float duration)
     {
-        if(xrControllers[controllerID] != null)
+        if (xrControllers[controllerID] != null && amplitude > .05f)
+        {
+            Debug.Log("Playing Haptics: " + controllerID + ", " + amplitude + ", " + duration);
             xrControllers[controllerID].SendImpulse(amplitude, duration);
+        }
     }
 
     internal void SetupHaptics()
