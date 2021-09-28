@@ -40,19 +40,19 @@ namespace SimpleInput
         /// </summary>
         public static event ButtonUpdated onJoystickClicked;
 
-        /// <summary> Invoked when Trigger is clicked -- TriggerClickUpdate(int controllerID)
+        /// <summary> Invoked when Trigger is clicked -- TriggerClickUpdate(int controllerID, bool down)
         /// </summary>
         public static event ButtonUpdated onTriggerClicked;
 
-        /// <summary> Invoked when Primary Button is pressed -- PrimaryButtonUpdate(int controllerID)
+        /// <summary> Invoked when Primary Button is pressed -- PrimaryButtonUpdate(int controllerID, bool down)
         /// </summary>
         public static event ButtonUpdated onPrimaryButtonUpdate;
 
-        /// <summary> Invoked when Secondary Button is pressed -- SecondaryButtonUpdate(int controllerID)
+        /// <summary> Invoked when Secondary Button is pressed -- SecondaryButtonUpdate(int controllerID, bool down)
         /// </summary>
         public static event ButtonUpdated onSecondaryButtonUpdate;
 
-        /// <summary> Invoked when Menu Button is pressed -- MenuButtonUpdate(int controllerID)
+        /// <summary> Invoked when Menu Button is pressed -- MenuButtonUpdate(int controllerID, bool down)
         /// </summary>
         public static event ButtonUpdated onMenuButtonUpdate;
 
@@ -74,7 +74,7 @@ namespace SimpleInput
 
         public delegate void AxisUpdated(int controllerID, Vector2 axis);
         public delegate void FloatUpdated(int controllerID, float value);
-        public delegate void ButtonUpdated(int controllerID);
+        public delegate void ButtonUpdated(int controllerID, bool down);
         Haptics myHaptics;
 
         #endregion
@@ -125,9 +125,9 @@ namespace SimpleInput
             onJoystickUpdate?.Invoke(controllerID, axis);
         }
 
-        internal void JoystickClickUpdate(int controllerID)
+        internal void JoystickClickUpdate(int controllerID, bool down)
         {
-            onJoystickClicked?.Invoke(controllerID);
+            onJoystickClicked?.Invoke(controllerID, down);
         }
 
         //Trigger
@@ -136,9 +136,9 @@ namespace SimpleInput
             onTriggerPullUpdate?.Invoke(controllerID, value);
         }
 
-        internal void TriggerClickUpdate(int controllerID)
+        internal void TriggerClickUpdate(int controllerID, bool down)
         {
-            onTriggerClicked?.Invoke(controllerID);
+            onTriggerClicked?.Invoke(controllerID, down);
         }
 
         //Grip
@@ -148,19 +148,19 @@ namespace SimpleInput
         }
 
         //Primary, Secondary and Menu
-        internal void PrimaryButtonUpdate(int controllerID)
+        internal void PrimaryButtonUpdate(int controllerID, bool down)
         {
-            onPrimaryButtonUpdate?.Invoke(controllerID);
+            onPrimaryButtonUpdate?.Invoke(controllerID, down);
         }
 
-        internal void SecondaryButtonUpdate(int controllerID)
+        internal void SecondaryButtonUpdate(int controllerID, bool down)
         {
-            onSecondaryButtonUpdate?.Invoke(controllerID);
+            onSecondaryButtonUpdate?.Invoke(controllerID, down);
         }
 
-        internal void MenuButtonUpdate(int controllerID)
+        internal void MenuButtonUpdate(int controllerID, bool down)
         {
-            onMenuButtonUpdate?.Invoke(controllerID);
+            onMenuButtonUpdate?.Invoke(controllerID, down);
         }
 
         #endregion
@@ -188,10 +188,12 @@ namespace SimpleInput
                 if (leftStickAction != null) leftStickAction.performed += Joystick_Left;
 
                 InputAction rightStickClick = actionMap.FindAction("JoystickClick_Right");
-                if (rightStickClick != null) rightStickClick.performed += JoystickClick_Right;
+                if (rightStickClick != null) rightStickClick.started += JoystickClickDown_Right;
+                if (rightStickClick != null) rightStickClick.canceled += JoystickClickUp_Right;
 
                 InputAction leftStickClick = actionMap.FindAction("JoystickClick_Left");
-                if (leftStickClick != null) leftStickClick.performed += JoystickClick_Left;
+                if (leftStickClick != null) leftStickClick.started += JoystickClickDown_Left;
+                if (leftStickClick != null) leftStickClick.canceled += JoystickClickUp_Left;
 
                 //Trigger
                 InputAction rightTriggerPull = actionMap.FindAction("Trigger_Right");
@@ -201,10 +203,12 @@ namespace SimpleInput
                 if (leftTriggerPull != null) leftTriggerPull.performed += TriggerPull_Left;
 
                 InputAction rightTriggerClick = actionMap.FindAction("TriggerClick_Right");
-                if (rightTriggerClick != null) rightTriggerClick.performed += TriggerClick_Right;
+                if (rightTriggerClick != null) rightTriggerClick.started += TriggerClickDown_Right;
+                if (rightTriggerClick != null) rightTriggerClick.canceled += TriggerClickUp_Right;
 
                 InputAction leftTriggerClick = actionMap.FindAction("TriggerClick_Left");
-                if (leftTriggerClick != null) leftTriggerClick.performed += TriggerClick_Left;
+                if (leftTriggerClick != null) leftTriggerClick.started += TriggerClickDown_Left;
+                if (leftTriggerClick != null) leftTriggerClick.canceled += TriggerClickUp_Left;
 
                 //Grip
                 InputAction rightGripPull = actionMap.FindAction("Grip_Right");
@@ -215,22 +219,28 @@ namespace SimpleInput
 
                 //Basic Buttons
                 InputAction primaryRight = actionMap.FindAction("Primary_Right");
-                if (primaryRight != null) primaryRight.performed += PrimaryButton_Right;
+                if (primaryRight != null) primaryRight.started += PrimaryButtonDown_Right;
+                if (primaryRight != null) primaryRight.canceled += PrimaryButtonUp_Right;
 
                 InputAction primaryLeft = actionMap.FindAction("Primary_Left");
-                if (primaryLeft != null) primaryLeft.performed += PrimaryButton_Left;
+                if (primaryLeft != null) primaryLeft.started += PrimaryButtonDown_Left;
+                if (primaryLeft != null) primaryLeft.canceled += PrimaryButtonUp_Left;
 
                 InputAction secondaryRight = actionMap.FindAction("Secondary_Right");
-                if (secondaryRight != null) secondaryRight.performed += SecondaryButton_Right;
+                if (secondaryRight != null) secondaryRight.started += SecondaryButtonDown_Right;
+                if (secondaryRight != null) secondaryRight.canceled += SecondaryButtonUp_Right;
 
                 InputAction secondaryLeft = actionMap.FindAction("Secondary_Left");
-                if (secondaryLeft != null) secondaryLeft.performed += SecondaryButton_Left;
+                if (secondaryLeft != null) secondaryLeft.started += SecondaryButtonDown_Left;
+                if (secondaryLeft != null) secondaryLeft.canceled += SecondaryButtonUp_Left;
 
                 InputAction menuRight = actionMap.FindAction("Menu_Right");
-                if (menuRight != null) menuRight.performed += MenuButton_Right;
+                if (menuRight != null) menuRight.started += MenuButtonDown_Right;
+                if (menuRight != null) menuRight.canceled += MenuButtonUp_Right;
 
                 InputAction menuLeft = actionMap.FindAction("Menu_Left");
-                if (menuLeft != null) menuLeft.performed += MenuButton_Left;
+                if (menuLeft != null) menuLeft.started += MenuButtonDown_Left;
+                if (menuLeft != null) menuLeft.canceled += MenuButtonUp_Left;
             }
 
             #region Joystick
@@ -246,14 +256,24 @@ namespace SimpleInput
                 myInput.JoystickPositionUpdate(1, turnVector);
             }
 
-            private void JoystickClick_Right(InputAction.CallbackContext obj)
+            private void JoystickClickDown_Right(InputAction.CallbackContext obj)
             {
-                myInput.JoystickClickUpdate(0);
+                myInput.JoystickClickUpdate(0, true);
             }
 
-            private void JoystickClick_Left(InputAction.CallbackContext obj)
+            private void JoystickClickUp_Right(InputAction.CallbackContext obj)
             {
-                myInput.JoystickClickUpdate(1);
+                myInput.JoystickClickUpdate(0, false);
+            }
+
+            private void JoystickClickDown_Left(InputAction.CallbackContext obj)
+            {
+                myInput.JoystickClickUpdate(1, true);
+            }
+
+            private void JoystickClickUp_Left(InputAction.CallbackContext obj)
+            {
+                myInput.JoystickClickUpdate(1, false);
             }
             #endregion
 
@@ -270,14 +290,24 @@ namespace SimpleInput
                 myInput.TriggerPullUpdate(1, pullAmount);
             }
 
-            private void TriggerClick_Right(InputAction.CallbackContext obj)
+            private void TriggerClickUp_Right(InputAction.CallbackContext obj)
             {
-                myInput.TriggerClickUpdate(0);
+                myInput.TriggerClickUpdate(0, false);
             }
 
-            private void TriggerClick_Left(InputAction.CallbackContext obj)
+            private void TriggerClickDown_Right(InputAction.CallbackContext obj)
             {
-                myInput.TriggerClickUpdate(1);
+                myInput.TriggerClickUpdate(0, true);
+            }
+
+            private void TriggerClickUp_Left(InputAction.CallbackContext obj)
+            {
+                myInput.TriggerClickUpdate(1, false);
+            }
+
+            private void TriggerClickDown_Left(InputAction.CallbackContext obj)
+            {
+                myInput.TriggerClickUpdate(1, true);
             }
             #endregion
 
@@ -296,34 +326,58 @@ namespace SimpleInput
             #endregion
 
             #region Basic Buttons
-            private void PrimaryButton_Right(InputAction.CallbackContext obj)
+            private void PrimaryButtonDown_Right(InputAction.CallbackContext obj)
             {
-                myInput.PrimaryButtonUpdate(0);
+                myInput.PrimaryButtonUpdate(0, true);
+            }
+            private void PrimaryButtonUp_Right(InputAction.CallbackContext obj)
+            {
+                myInput.PrimaryButtonUpdate(0, false);
             }
 
-            private void PrimaryButton_Left(InputAction.CallbackContext obj)
+            private void PrimaryButtonDown_Left(InputAction.CallbackContext obj)
             {
-                myInput.PrimaryButtonUpdate(1);
+                myInput.PrimaryButtonUpdate(1, true);
+            }
+            private void PrimaryButtonUp_Left(InputAction.CallbackContext obj)
+            {
+                myInput.PrimaryButtonUpdate(1, false);
             }
 
-            private void SecondaryButton_Right(InputAction.CallbackContext obj)
+            private void SecondaryButtonDown_Right(InputAction.CallbackContext obj)
             {
-                myInput.SecondaryButtonUpdate(0);
+                myInput.SecondaryButtonUpdate(0, true);
+            }
+            private void SecondaryButtonUp_Right(InputAction.CallbackContext obj)
+            {
+                myInput.SecondaryButtonUpdate(0, false);
             }
 
-            private void SecondaryButton_Left(InputAction.CallbackContext obj)
+            private void SecondaryButtonDown_Left(InputAction.CallbackContext obj)
             {
-                myInput.SecondaryButtonUpdate(1);
+                myInput.SecondaryButtonUpdate(1, true);
+            }
+            private void SecondaryButtonUp_Left(InputAction.CallbackContext obj)
+            {
+                myInput.SecondaryButtonUpdate(1, false);
             }
 
-            private void MenuButton_Right(InputAction.CallbackContext obj)
+            private void MenuButtonDown_Right(InputAction.CallbackContext obj)
             {
-                myInput.MenuButtonUpdate(0);
+                myInput.MenuButtonUpdate(0, true);
+            }
+            private void MenuButtonUp_Right(InputAction.CallbackContext obj)
+            {
+                myInput.MenuButtonUpdate(0, false);
             }
 
-            private void MenuButton_Left(InputAction.CallbackContext obj)
+            private void MenuButtonDown_Left(InputAction.CallbackContext obj)
             {
-                myInput.MenuButtonUpdate(1);
+                myInput.MenuButtonUpdate(1, true);
+            }
+            private void MenuButtonUp_Left(InputAction.CallbackContext obj)
+            {
+                myInput.MenuButtonUpdate(1, false);
             }
             #endregion
         }

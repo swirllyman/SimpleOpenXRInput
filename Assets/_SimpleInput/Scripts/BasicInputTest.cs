@@ -15,24 +15,28 @@ public class BasicInputTest : MonoBehaviour
         SimpleOpenXRInput.onJoystickClicked += BasicInput_onJoystickClickUpdate;
     }
 
-    private void BasicInput_onJoystickClickUpdate(int controllerID)
+    private void BasicInput_onJoystickClickUpdate(int controllerID, bool down)
     {
-        SimpleOpenXRInput.PlayHaptics(controllerID, .5f, .15f);
+        if (down)
+            SimpleOpenXRInput.PlayHaptics(controllerID, .5f, .15f);
     }
 
-    private void BasicInput_onMenuButtonUpdate(int controllerID)
+    private void BasicInput_onMenuButtonUpdate(int controllerID, bool down)
     {
-        SimpleOpenXRInput.PlayHaptics(controllerID, 1.0f, .25f);
+        if (down)
+            SimpleOpenXRInput.PlayHaptics(controllerID, 1.0f, .25f);
     }
 
-    private void BasicInput_onSecondardButtonUpdate(int controllerID)
+    private void BasicInput_onSecondardButtonUpdate(int controllerID, bool down)
     {
-        SimpleOpenXRInput.PlayHaptics(controllerID, 1.0f, .5f);
+        if(down)
+            SimpleOpenXRInput.PlayHaptics(controllerID, 1.0f, .5f);
     }
 
-    private void BasicInput_onPrimaryButtonUpdate(int controllerID)
+    private void BasicInput_onPrimaryButtonUpdate(int controllerID, bool down)
     {
-        SimpleOpenXRInput.PlayHaptics(controllerID, 1.0f, 1.0f);
+        if (down)
+            SimpleOpenXRInput.PlayHaptics(controllerID, 1.0f, 1.0f);
     }
 
     private void GripPull(int controllerID, float value)
