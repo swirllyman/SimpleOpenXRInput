@@ -84,19 +84,9 @@ namespace SimpleInput
         //Build Action Map based on Unity OpenXR standard for binding configurations
         void SetupOpenXRInput()
         {
-            List<InputAction> rightHandInputActions = new List<InputAction>();
             List<InputAction> leftHandHandInputActions = new List<InputAction>();
+            List<InputAction> rightHandInputActions = new List<InputAction>();
             InputActionMap actionMap = new InputActionMap();
-
-            //Setup Right Hand Actions And Add To Map
-            rightHandInputActions.Add(actionMap.AddAction("Joystick_Right", binding: "<XRController>{RightHand}/{primary2DAxis}"));
-            rightHandInputActions.Add(actionMap.AddAction("JoystickClick_Right", binding: "<XRController>{RightHand}/{primary2DAxisClick}"));
-            rightHandInputActions.Add(actionMap.AddAction("Trigger_Right", binding: "<XRController>{RightHand}/{trigger}"));
-            rightHandInputActions.Add(actionMap.AddAction("TriggerClick_Right", binding: "<XRController>{RightHand}/{triggerButton}"));
-            rightHandInputActions.Add(actionMap.AddAction("Grip_Right", binding: "<XRController>{RightHand}/{grip}"));
-            rightHandInputActions.Add(actionMap.AddAction("Primary_Right", binding: "<XRController>{RightHand}/{primaryButton}"));
-            rightHandInputActions.Add(actionMap.AddAction("Secondary_Right", binding: "<XRController>{RightHand}/{secondaryButton}"));
-            rightHandInputActions.Add(actionMap.AddAction("Menu_Right", binding: "<XRController>{RightHand}/menu"));
 
             //Setup Left Hand Actions And Add To Map
             leftHandHandInputActions.Add(actionMap.AddAction("Joystick_Left", binding: "<XRController>{LeftHand}/{primary2DAxis}"));
@@ -108,10 +98,20 @@ namespace SimpleInput
             leftHandHandInputActions.Add(actionMap.AddAction("Secondary_Left", binding: "<XRController>{LeftHand}/{secondaryButton}"));
             leftHandHandInputActions.Add(actionMap.AddAction("Menu_Left", binding: "<XRController>{LeftHand}/menu"));
 
+            //Setup Right Hand Actions And Add To Map
+            rightHandInputActions.Add(actionMap.AddAction("Joystick_Right", binding: "<XRController>{RightHand}/{primary2DAxis}"));
+            rightHandInputActions.Add(actionMap.AddAction("JoystickClick_Right", binding: "<XRController>{RightHand}/{primary2DAxisClick}"));
+            rightHandInputActions.Add(actionMap.AddAction("Trigger_Right", binding: "<XRController>{RightHand}/{trigger}"));
+            rightHandInputActions.Add(actionMap.AddAction("TriggerClick_Right", binding: "<XRController>{RightHand}/{triggerButton}"));
+            rightHandInputActions.Add(actionMap.AddAction("Grip_Right", binding: "<XRController>{RightHand}/{grip}"));
+            rightHandInputActions.Add(actionMap.AddAction("Primary_Right", binding: "<XRController>{RightHand}/{primaryButton}"));
+            rightHandInputActions.Add(actionMap.AddAction("Secondary_Right", binding: "<XRController>{RightHand}/{secondaryButton}"));
+            rightHandInputActions.Add(actionMap.AddAction("Menu_Right", binding: "<XRController>{RightHand}/menu"));
+
             //IMPORTANT: Make sure you enable the Map once created.
             actionMap.Enable();
 
-            myHaptics = new Haptics(rightHandInputActions.ToArray(), leftHandHandInputActions.ToArray());
+            myHaptics = new Haptics(leftHandHandInputActions.ToArray(), rightHandInputActions.ToArray());
             new InputActions(this, actionMap);
         }
 
@@ -158,6 +158,7 @@ namespace SimpleInput
             onSecondaryButtonUpdate?.Invoke(controllerID, down);
         }
 
+        //Menu
         internal void MenuButtonUpdate(int controllerID, bool down)
         {
             onMenuButtonUpdate?.Invoke(controllerID, down);
@@ -181,144 +182,150 @@ namespace SimpleInput
                 myInput = input;
 
                 //Joystick
-                InputAction rightStickAction = actionMap.FindAction("Joystick_Right");
-                if (rightStickAction != null) rightStickAction.performed += Joystick_Right;
-
                 InputAction leftStickAction = actionMap.FindAction("Joystick_Left");
                 if (leftStickAction != null) leftStickAction.performed += Joystick_Left;
 
-                InputAction rightStickClick = actionMap.FindAction("JoystickClick_Right");
-                if (rightStickClick != null) rightStickClick.started += JoystickClickDown_Right;
-                if (rightStickClick != null) rightStickClick.canceled += JoystickClickUp_Right;
+                InputAction rightStickAction = actionMap.FindAction("Joystick_Right");
+                if (rightStickAction != null) rightStickAction.performed += Joystick_Right;
 
                 InputAction leftStickClick = actionMap.FindAction("JoystickClick_Left");
                 if (leftStickClick != null) leftStickClick.started += JoystickClickDown_Left;
                 if (leftStickClick != null) leftStickClick.canceled += JoystickClickUp_Left;
 
-                //Trigger
-                InputAction rightTriggerPull = actionMap.FindAction("Trigger_Right");
-                if (rightTriggerPull != null) rightTriggerPull.performed += TriggerPull_Right;
+                InputAction rightStickClick = actionMap.FindAction("JoystickClick_Right");
+                if (rightStickClick != null) rightStickClick.started += JoystickClickDown_Right;
+                if (rightStickClick != null) rightStickClick.canceled += JoystickClickUp_Right;
 
+
+                //Trigger
                 InputAction leftTriggerPull = actionMap.FindAction("Trigger_Left");
                 if (leftTriggerPull != null) leftTriggerPull.performed += TriggerPull_Left;
 
-                InputAction rightTriggerClick = actionMap.FindAction("TriggerClick_Right");
-                if (rightTriggerClick != null) rightTriggerClick.started += TriggerClickDown_Right;
-                if (rightTriggerClick != null) rightTriggerClick.canceled += TriggerClickUp_Right;
+                InputAction rightTriggerPull = actionMap.FindAction("Trigger_Right");
+                if (rightTriggerPull != null) rightTriggerPull.performed += TriggerPull_Right;
 
                 InputAction leftTriggerClick = actionMap.FindAction("TriggerClick_Left");
                 if (leftTriggerClick != null) leftTriggerClick.started += TriggerClickDown_Left;
                 if (leftTriggerClick != null) leftTriggerClick.canceled += TriggerClickUp_Left;
 
-                //Grip
-                InputAction rightGripPull = actionMap.FindAction("Grip_Right");
-                if (rightGripPull != null) rightGripPull.performed += Grip_Right;
+                InputAction rightTriggerClick = actionMap.FindAction("TriggerClick_Right");
+                if (rightTriggerClick != null) rightTriggerClick.started += TriggerClickDown_Right;
+                if (rightTriggerClick != null) rightTriggerClick.canceled += TriggerClickUp_Right;
 
+
+                //Grip
                 InputAction leftGripPull = actionMap.FindAction("Grip_Left");
                 if (leftGripPull != null) leftGripPull.performed += Grip_Left;
 
-                //Basic Buttons
-                InputAction primaryRight = actionMap.FindAction("Primary_Right");
-                if (primaryRight != null) primaryRight.started += PrimaryButtonDown_Right;
-                if (primaryRight != null) primaryRight.canceled += PrimaryButtonUp_Right;
+                InputAction rightGripPull = actionMap.FindAction("Grip_Right");
+                if (rightGripPull != null) rightGripPull.performed += Grip_Right;
 
+                //Basic Buttons
                 InputAction primaryLeft = actionMap.FindAction("Primary_Left");
                 if (primaryLeft != null) primaryLeft.started += PrimaryButtonDown_Left;
                 if (primaryLeft != null) primaryLeft.canceled += PrimaryButtonUp_Left;
 
-                InputAction secondaryRight = actionMap.FindAction("Secondary_Right");
-                if (secondaryRight != null) secondaryRight.started += SecondaryButtonDown_Right;
-                if (secondaryRight != null) secondaryRight.canceled += SecondaryButtonUp_Right;
+                InputAction primaryRight = actionMap.FindAction("Primary_Right");
+                if (primaryRight != null) primaryRight.started += PrimaryButtonDown_Right;
+                if (primaryRight != null) primaryRight.canceled += PrimaryButtonUp_Right;
 
                 InputAction secondaryLeft = actionMap.FindAction("Secondary_Left");
                 if (secondaryLeft != null) secondaryLeft.started += SecondaryButtonDown_Left;
                 if (secondaryLeft != null) secondaryLeft.canceled += SecondaryButtonUp_Left;
 
-                InputAction menuRight = actionMap.FindAction("Menu_Right");
-                if (menuRight != null) menuRight.started += MenuButtonDown_Right;
-                if (menuRight != null) menuRight.canceled += MenuButtonUp_Right;
+                InputAction secondaryRight = actionMap.FindAction("Secondary_Right");
+                if (secondaryRight != null) secondaryRight.started += SecondaryButtonDown_Right;
+                if (secondaryRight != null) secondaryRight.canceled += SecondaryButtonUp_Right;
 
+                //Menu
                 InputAction menuLeft = actionMap.FindAction("Menu_Left");
                 if (menuLeft != null) menuLeft.started += MenuButtonDown_Left;
                 if (menuLeft != null) menuLeft.canceled += MenuButtonUp_Left;
+
+                InputAction menuRight = actionMap.FindAction("Menu_Right");
+                if (menuRight != null) menuRight.started += MenuButtonDown_Right;
+                if (menuRight != null) menuRight.canceled += MenuButtonUp_Right;
             }
 
             #region Joystick
-            private void Joystick_Right(InputAction.CallbackContext obj)
+            private void Joystick_Left(InputAction.CallbackContext obj)
             {
                 Vector2 turnVector = obj.ReadValue<Vector2>();
                 myInput.JoystickPositionUpdate(0, turnVector);
             }
 
-            private void Joystick_Left(InputAction.CallbackContext obj)
+            private void Joystick_Right(InputAction.CallbackContext obj)
             {
                 Vector2 turnVector = obj.ReadValue<Vector2>();
                 myInput.JoystickPositionUpdate(1, turnVector);
             }
 
-            private void JoystickClickDown_Right(InputAction.CallbackContext obj)
+            private void JoystickClickDown_Left(InputAction.CallbackContext obj)
             {
                 myInput.JoystickClickUpdate(0, true);
             }
 
-            private void JoystickClickUp_Right(InputAction.CallbackContext obj)
+            private void JoystickClickUp_Left(InputAction.CallbackContext obj)
             {
                 myInput.JoystickClickUpdate(0, false);
             }
 
-            private void JoystickClickDown_Left(InputAction.CallbackContext obj)
+            private void JoystickClickDown_Right(InputAction.CallbackContext obj)
             {
                 myInput.JoystickClickUpdate(1, true);
             }
 
-            private void JoystickClickUp_Left(InputAction.CallbackContext obj)
+            private void JoystickClickUp_Right(InputAction.CallbackContext obj)
             {
                 myInput.JoystickClickUpdate(1, false);
             }
             #endregion
 
             #region Trigger
-            private void TriggerPull_Right(InputAction.CallbackContext obj)
+            //Trigger Pull -- 0-1 float
+            private void TriggerPull_Left(InputAction.CallbackContext obj)
             {
                 float pullAmount = obj.ReadValue<float>();
                 myInput.TriggerPullUpdate(0, pullAmount);
             }
 
-            private void TriggerPull_Left(InputAction.CallbackContext obj)
+            private void TriggerPull_Right(InputAction.CallbackContext obj)
             {
                 float pullAmount = obj.ReadValue<float>();
                 myInput.TriggerPullUpdate(1, pullAmount);
             }
 
-            private void TriggerClickUp_Right(InputAction.CallbackContext obj)
+            //Click -- Bool
+            private void TriggerClickUp_Left(InputAction.CallbackContext obj)
             {
                 myInput.TriggerClickUpdate(0, false);
             }
 
-            private void TriggerClickDown_Right(InputAction.CallbackContext obj)
+            private void TriggerClickDown_Left(InputAction.CallbackContext obj)
             {
                 myInput.TriggerClickUpdate(0, true);
             }
 
-            private void TriggerClickUp_Left(InputAction.CallbackContext obj)
+            private void TriggerClickUp_Right(InputAction.CallbackContext obj)
             {
                 myInput.TriggerClickUpdate(1, false);
             }
 
-            private void TriggerClickDown_Left(InputAction.CallbackContext obj)
+            private void TriggerClickDown_Right(InputAction.CallbackContext obj)
             {
                 myInput.TriggerClickUpdate(1, true);
             }
+
             #endregion
 
             #region Grip
-            private void Grip_Right(InputAction.CallbackContext obj)
+            private void Grip_Left(InputAction.CallbackContext obj)
             {
                 float pullAmount = obj.ReadValue<float>();
                 myInput.GripPullUpdate(0, pullAmount);
             }
 
-            private void Grip_Left(InputAction.CallbackContext obj)
+            private void Grip_Right(InputAction.CallbackContext obj)
             {
                 float pullAmount = obj.ReadValue<float>();
                 myInput.GripPullUpdate(1, pullAmount);
@@ -326,56 +333,59 @@ namespace SimpleInput
             #endregion
 
             #region Basic Buttons
-            private void PrimaryButtonDown_Right(InputAction.CallbackContext obj)
+            //Primary Buttons
+            private void PrimaryButtonDown_Left(InputAction.CallbackContext obj)
             {
                 myInput.PrimaryButtonUpdate(0, true);
             }
-            private void PrimaryButtonUp_Right(InputAction.CallbackContext obj)
+            private void PrimaryButtonUp_Left(InputAction.CallbackContext obj)
             {
                 myInput.PrimaryButtonUpdate(0, false);
             }
 
-            private void PrimaryButtonDown_Left(InputAction.CallbackContext obj)
+            private void PrimaryButtonDown_Right(InputAction.CallbackContext obj)
             {
                 myInput.PrimaryButtonUpdate(1, true);
             }
-            private void PrimaryButtonUp_Left(InputAction.CallbackContext obj)
+            private void PrimaryButtonUp_Right(InputAction.CallbackContext obj)
             {
                 myInput.PrimaryButtonUpdate(1, false);
             }
-
-            private void SecondaryButtonDown_Right(InputAction.CallbackContext obj)
+            
+            //Secondary Buttons
+            private void SecondaryButtonDown_Left(InputAction.CallbackContext obj)
             {
                 myInput.SecondaryButtonUpdate(0, true);
             }
-            private void SecondaryButtonUp_Right(InputAction.CallbackContext obj)
+            private void SecondaryButtonUp_Left(InputAction.CallbackContext obj)
             {
                 myInput.SecondaryButtonUpdate(0, false);
             }
 
-            private void SecondaryButtonDown_Left(InputAction.CallbackContext obj)
+            private void SecondaryButtonDown_Right(InputAction.CallbackContext obj)
             {
                 myInput.SecondaryButtonUpdate(1, true);
             }
-            private void SecondaryButtonUp_Left(InputAction.CallbackContext obj)
+            private void SecondaryButtonUp_Right(InputAction.CallbackContext obj)
             {
                 myInput.SecondaryButtonUpdate(1, false);
             }
 
-            private void MenuButtonDown_Right(InputAction.CallbackContext obj)
+            //Menu Buttons
+            private void MenuButtonDown_Left(InputAction.CallbackContext obj)
             {
                 myInput.MenuButtonUpdate(0, true);
             }
-            private void MenuButtonUp_Right(InputAction.CallbackContext obj)
+            private void MenuButtonUp_Left(InputAction.CallbackContext obj)
             {
                 myInput.MenuButtonUpdate(0, false);
             }
 
-            private void MenuButtonDown_Left(InputAction.CallbackContext obj)
+            private void MenuButtonDown_Right(InputAction.CallbackContext obj)
             {
                 myInput.MenuButtonUpdate(1, true);
             }
-            private void MenuButtonUp_Left(InputAction.CallbackContext obj)
+            private void MenuButtonUp_Right(InputAction.CallbackContext obj)
             {
                 myInput.MenuButtonUpdate(1, false);
             }
@@ -393,23 +403,22 @@ namespace SimpleInput
         class Haptics
         {
             static XRControllerWithRumble[] xrControllers = new XRControllerWithRumble[2];
-            InputAction[] rightHandActions, leftHandActions;
+            InputAction[] leftHandActions, rightHandActions;
             bool[] controllersAssigned = new bool[2];
 
             //Initialized wtih all possible input actions so we can detect when a controller was used.
-            public Haptics(InputAction[] newRightHandActions, InputAction[] newLeftHandActions)
+            public Haptics(InputAction[] newLeftHandActions, InputAction[] newRightHandActions)
             {
-                //Debug.Log(" Setting Up New Haptics");
-                rightHandActions = newRightHandActions;
                 leftHandActions = newLeftHandActions;
-                for (int i = 0; i < rightHandActions.Length; i++)
-                {
-                    rightHandActions[i].performed += SetupRightController;
-                }
-
+                rightHandActions = newRightHandActions;
                 for (int i = 0; i < leftHandActions.Length; i++)
                 {
                     leftHandActions[i].performed += SetupLeftController;
+                }
+
+                for (int i = 0; i < rightHandActions.Length; i++)
+                {
+                    rightHandActions[i].performed += SetupRightController;
                 }
             }
 
@@ -417,16 +426,30 @@ namespace SimpleInput
             {
                 if (xrControllers[controllerID] != null && amplitude > .05f)
                 {
-                    //Debug.Log("Playing Haptics: " + controllerID + ", " + amplitude + ", " + duration);
                     xrControllers[controllerID].SendImpulse(amplitude, duration);
+                }
+            }
+
+            void SetupLeftController(InputAction.CallbackContext obj)
+            {
+                if (!controllersAssigned[0]) controllersAssigned[0] = AssignController(obj.action, 0);
+
+                // Make sure to Unsubscribe from Setup
+                if (controllersAssigned[0])
+                {
+                    for (int i = 0; i < leftHandActions.Length; i++)
+                    {
+                        leftHandActions[i].performed -= SetupLeftController;
+                    }
                 }
             }
 
             void SetupRightController(InputAction.CallbackContext obj)
             {
-                //Debug.Log("Setup Conrtoller Called");
-                if (!controllersAssigned[0]) controllersAssigned[0] = AssignController(obj.action, 0);
-                if (controllersAssigned[0])
+                if (!controllersAssigned[1]) controllersAssigned[1] = AssignController(obj.action, 1);
+
+                // Make sure to Unsubscribe from Setup
+                if (controllersAssigned[1])
                 {
                     for (int i = 0; i < rightHandActions.Length; i++)
                     {
@@ -435,28 +458,15 @@ namespace SimpleInput
                 }
             }
 
-            void SetupLeftController(InputAction.CallbackContext obj)
-            {
-                if (!controllersAssigned[1]) controllersAssigned[1] = AssignController(obj.action, 1);
-                if (controllersAssigned[1])
-                {
-                    for (int i = 0; i < leftHandActions.Length; i++)
-                    {
-                        leftHandActions[i].performed -= SetupRightController;
-                    }
-                }
-            }
-
             bool AssignController(InputAction inputAction, int handID)
             {
                 var control = inputAction.activeControl;
-                if (null == control)
+                if (control == null)
                     return false;
                 else
                 {
                     if (control.device is XRControllerWithRumble rumble)
                     {
-                        //Debug.Log("Controller "+handID+" Setup");
                         xrControllers[handID] = rumble;
                         return true;
                     }
