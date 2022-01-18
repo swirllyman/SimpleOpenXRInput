@@ -14,16 +14,7 @@ namespace SimpleInput
     {
         #region -- Public Interface ---------------------------------
 
-        /// <summary> Call to make controllers vibrate / rumble / etc...
-        /// </summary>
-        /// <param name="controllerID">Controller to Vibrate</param>
-        /// <param name="amplitude">Vibrate Amount (0.0f - 1.0f)</param>
-        /// <param name="duration">Time in seconds vibration will happen for</param>
-        public static void PlayHaptics(int controllerID, float amplitude, float duration)
-        {
-            Haptics.PlayHaptics(controllerID, amplitude, duration);
-        }
-
+        #region -- Events -------------------------------------------
         /// <summary> Invoked anytime joystick position is updated -- JoystickPositionUpdate(int controllerID, Vector2 axis) 
         /// </summary>
         public static event AxisUpdated onJoystickUpdate;
@@ -31,6 +22,8 @@ namespace SimpleInput
         /// <summary> Invoked anytime Grip is updated -- GripPullUpdate(int controllerID, float value)
         /// </summary>
         public static event FloatUpdated onGripPullUpdate;
+
+        public static event ButtonUpdated onGripClicked;
 
         /// <summary> Invoked anytime Trigger is updated -- TriggerPullUpdate(int controllerID, float value)
         /// </summary>
@@ -55,6 +48,76 @@ namespace SimpleInput
         /// <summary> Invoked when Menu Button is pressed -- MenuButtonUpdate(int controllerID, bool down)
         /// </summary>
         public static event ButtonUpdated onMenuButtonUpdate;
+        #endregion
+
+        #region --  Static Getters
+        /// <summary> Call to make controllers vibrate / rumble / etc...
+        /// </summary>
+        /// <param name="controllerID">Controller to Vibrate</param>
+        /// <param name="amplitude">Vibrate Amount (0.0f - 1.0f)</param>
+        /// <param name="duration">Time in seconds vibration will happen for</param>
+        public static void PlayHaptics(int controllerID, float amplitude, float duration)
+        {
+            Haptics.PlayHaptics(controllerID, amplitude, duration);
+        }
+
+        /// <summary>
+        /// Get a Value between 0.0 and 1.0 to determine the amount the Grip is currently squeezed
+        /// </summary>
+        /// <param name="handID">Hand ID correlated</param>
+        /// <returns>Current Grip Value</returns>
+        public static float GetGripValue(int handID)
+        {
+            float gripValue;
+            if (handID == 0)
+            {
+                gripValue = leftHandInputActions[4].ReadValue<float>();
+            }
+            else
+            {
+                gripValue = rightHandInputActions[4].ReadValue<float>();
+            }
+            return gripValue;
+        }
+
+        /// <summary>
+        /// Get a Value between 0.0 and 1.0 to determine the amount the Trigger is currently squeezed
+        /// </summary>
+        /// <param name="handID">Hand ID correlated</param>
+        /// <returns>Current Trigger Value</returns>
+        public static float GetTriggerValue(int handID)
+        {
+            float triggerValue;
+            if (handID == 0)
+            {
+                triggerValue = leftHandInputActions[2].ReadValue<float>();
+            }
+            else
+            {
+                triggerValue = rightHandInputActions[2].ReadValue<float>();
+            }
+            return triggerValue;
+        }
+
+        /// <summary>
+        /// Get the Vector2 between 0.0 and 1.0 to determine the current Joystick amount
+        /// </summary>
+        /// <param name="handID">Hand ID correlated</param>
+        /// <returns>X and Y values of current Joystick</returns>
+        public static Vector2 GetJoystickValue(int handID)
+        {
+            Vector2 joystickValue;
+            if (handID == 0)
+            {
+                joystickValue = leftHandInputActions[0].ReadValue<Vector2>();
+            }
+            else
+            {
+                joystickValue = rightHandInputActions[0].ReadValue<Vector2>();
+            }
+            return joystickValue;
+        }
+        #endregion
 
         #endregion
 
@@ -75,8 +138,9 @@ namespace SimpleInput
         public delegate void AxisUpdated(int controllerID, Vector2 axis);
         public delegate void FloatUpdated(int controllerID, float value);
         public delegate void ButtonUpdated(int controllerID, bool down);
+        public static List<InputAction> leftHandInputActions = new List<InputAction>();
+        public static List<InputAction> rightHandInputActions = new List<InputAction>();
         Haptics myHaptics;
-
         #endregion
 
         #region Action Map
@@ -84,19 +148,19 @@ namespace SimpleInput
         //Build Action Map based on Unity OpenXR standard for binding configurations
         void SetupOpenXRInput()
         {
-            List<InputAction> leftHandHandInputActions = new List<InputAction>();
-            List<InputAction> rightHandInputActions = new List<InputAction>();
+            leftHandInputActions = new List<InputAction>();
+            rightHandInputActions = new List<InputAction>();
             InputActionMap actionMap = new InputActionMap();
 
             //Setup Left Hand Actions And Add To Map
-            leftHandHandInputActions.Add(actionMap.AddAction("Joystick_Left", binding: "<XRController>{LeftHand}/{primary2DAxis}"));
-            leftHandHandInputActions.Add(actionMap.AddAction("JoystickClick_Left", binding: "<XRController>{LeftHand}/{primary2DAxisClick}"));
-            leftHandHandInputActions.Add(actionMap.AddAction("Trigger_Left", binding: "<XRController>{LeftHand}/{trigger}"));
-            leftHandHandInputActions.Add(actionMap.AddAction("TriggerClick_Left", binding: "<XRController>{LeftHand}/{triggerButton}"));
-            leftHandHandInputActions.Add(actionMap.AddAction("Grip_Left", binding: "<XRController>{LeftHand}/{grip}"));
-            leftHandHandInputActions.Add(actionMap.AddAction("Primary_Left", binding: "<XRController>{LeftHand}/{primaryButton}"));
-            leftHandHandInputActions.Add(actionMap.AddAction("Secondary_Left", binding: "<XRController>{LeftHand}/{secondaryButton}"));
-            leftHandHandInputActions.Add(actionMap.AddAction("Menu_Left", binding: "<XRController>{LeftHand}/menu"));
+            leftHandInputActions.Add(actionMap.AddAction("Joystick_Left", binding: "<XRController>{LeftHand}/{primary2DAxis}"));
+            leftHandInputActions.Add(actionMap.AddAction("JoystickClick_Left", binding: "<XRController>{LeftHand}/{primary2DAxisClick}"));
+            leftHandInputActions.Add(actionMap.AddAction("Trigger_Left", binding: "<XRController>{LeftHand}/{trigger}"));
+            leftHandInputActions.Add(actionMap.AddAction("TriggerClick_Left", binding: "<XRController>{LeftHand}/{triggerButton}"));
+            leftHandInputActions.Add(actionMap.AddAction("Grip_Left", binding: "<XRController>{LeftHand}/{grip}"));
+            leftHandInputActions.Add(actionMap.AddAction("Primary_Left", binding: "<XRController>{LeftHand}/{primaryButton}"));
+            leftHandInputActions.Add(actionMap.AddAction("Secondary_Left", binding: "<XRController>{LeftHand}/{secondaryButton}"));
+            leftHandInputActions.Add(actionMap.AddAction("Menu_Left", binding: "<XRController>{LeftHand}/menu"));
 
             //Setup Right Hand Actions And Add To Map
             rightHandInputActions.Add(actionMap.AddAction("Joystick_Right", binding: "<XRController>{RightHand}/{primary2DAxis}"));
@@ -111,7 +175,7 @@ namespace SimpleInput
             //IMPORTANT: Make sure you enable the Map once created.
             actionMap.Enable();
 
-            myHaptics = new Haptics(leftHandHandInputActions.ToArray(), rightHandInputActions.ToArray());
+            myHaptics = new Haptics(leftHandInputActions.ToArray(), rightHandInputActions.ToArray());
             new InputActions(this, actionMap);
         }
 
@@ -145,6 +209,11 @@ namespace SimpleInput
         internal void GripPullUpdate(int controllerID, float value)
         {
             onGripPullUpdate?.Invoke(controllerID, value);
+        }
+
+        internal void GripButtonUpdate(int controllerID, bool down)
+        {
+            onGripClicked?.Invoke(controllerID, down);
         }
 
         //Primary, Secondary and Menu
@@ -219,6 +288,20 @@ namespace SimpleInput
 
                 InputAction rightGripPull = actionMap.FindAction("Grip_Right");
                 if (rightGripPull != null) rightGripPull.performed += Grip_Right;
+
+                InputAction gripRight = actionMap.FindAction("Grip_Right");
+                if (gripRight != null)
+                {
+                    gripRight.started += GripButtonDown_Right;
+                    gripRight.canceled += GripButtonUp_Right;
+                }
+
+                InputAction gripLeft = actionMap.FindAction("Grip_Left");
+                if (gripLeft != null)
+                {
+                    gripLeft.started += GripButtonDown_Left;
+                    gripLeft.canceled += GripButtonUp_Left;
+                }
 
                 //Basic Buttons
                 InputAction primaryLeft = actionMap.FindAction("Primary_Left");
@@ -330,6 +413,26 @@ namespace SimpleInput
                 float pullAmount = obj.ReadValue<float>();
                 myInput.GripPullUpdate(1, pullAmount);
             }
+
+            private void GripButtonUp_Right(InputAction.CallbackContext obj)
+            {
+                myInput.GripButtonUpdate(1, false);
+            }
+
+            private void GripButtonDown_Right(InputAction.CallbackContext obj)
+            {
+                myInput.GripButtonUpdate(1, true);
+            }
+
+            private void GripButtonUp_Left(InputAction.CallbackContext obj)
+            {
+                myInput.GripButtonUpdate(0, false);
+            }
+
+            private void GripButtonDown_Left(InputAction.CallbackContext obj)
+            {
+                myInput.GripButtonUpdate(0, true);
+            }
             #endregion
 
             #region Basic Buttons
@@ -351,7 +454,7 @@ namespace SimpleInput
             {
                 myInput.PrimaryButtonUpdate(1, false);
             }
-            
+
             //Secondary Buttons
             private void SecondaryButtonDown_Left(InputAction.CallbackContext obj)
             {
